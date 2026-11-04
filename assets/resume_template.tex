@@ -1,0 +1,73 @@
+% Starter template for a master resume. Compile with pdfLaTeX.
+% Single column, no tables or graphics, so ATS parsers can read it.
+% All names and details below are sample text: replace them, and delete any
+% section you don't need.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=0.7in]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+% Keep the PDF text copyable so ATS parsers extract it correctly.
+\input{glyphtounicode}
+\pdfgentounicode=1
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% Usage: \resumesection{Section title}
+\newcommand{\resumesection}[1]{%
+  \vspace{10pt}
+  {\large\bfseries #1 \par}
+  \vspace{2pt}\hrule\vspace{5pt}
+}
+
+% Usage: \resumeentry{Role or degree}{Dates}{Organization}{Location}
+\newcommand{\resumeentry}[4]{%
+  \textbf{#1} \hfill #2 \par
+  \textit{#3} \hfill #4 \par
+}
+
+% A tighter bullet list
+\newenvironment{resumeitems}
+  {\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parsep}{0pt}}
+  {\end{itemize}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Your Name} \par\vspace{3pt}
+  City, Country \textbar{} +91 90000 00000 \textbar{}
+  \href{mailto:you@example.com}{you@example.com} \textbar{}
+  \href{https://www.linkedin.com/in/your-profile}{linkedin.com/in/your-profile}
+\end{center}
+
+\resumesection{Experience}
+
+\resumeentry{Job Title}{Mon YYYY -- Present}{Company Name}{City}
+\begin{resumeitems}
+  \item What you built or changed, the tools you used, and the result.
+  \item Another piece of work, with a real metric if you have one.
+\end{resumeitems}
+
+\resumesection{Projects}
+
+\textbf{Project Name} \textbar{} Tools used \par
+\begin{resumeitems}
+  \item What the project does and what you did on it.
+\end{resumeitems}
+
+\resumesection{Skills}
+
+\textbf{Languages:} List your languages \par
+\textbf{Tools:} List your frameworks, platforms, and tools \par
+
+\resumesection{Education}
+
+\resumeentry{Degree, Major}{YYYY -- YYYY}{College or University}{CGPA or percentage}
+
+\end{document}
