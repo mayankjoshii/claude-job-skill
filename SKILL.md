@@ -45,9 +45,7 @@ Once collected, **summarize the profile back** to the user for confirmation. Sto
 
 **If the user's profile is already known**, skip setup and go straight to the requested command.
 
-**If `~/.claude/job-skill/config.md` lists a readable `master_resume`**, use that file as the resume in step 1 instead of asking for an upload.
-
-**If the user asks to create or tailor a resume**, skip setup entirely and follow the **Resume Tailoring Workflow** section. That workflow decides which resume to use and asks only for what it needs.
+**If the user asks to create or tailor a resume for a job description**, skip setup entirely and follow the **Resume Tailoring Workflow** section. The master resume is the source of truth, so do not ask for an upload.
 
 ## Commands
 
@@ -73,7 +71,6 @@ Display this usage guide and stop. Do NOT proceed to search or apply — just sh
 - "Search for data science roles in Pune, 15-25 LPA"
 - "Apply to this job: [paste URL]"
 - "Tailor my resume for this job description: [paste JD]"
-- "Create a LaTeX resume from my PDF"
 - "Find HRs at Razorpay for this job and message them on LinkedIn: [paste URL]"
 - "What's the status of my applications?"
 - "Any responses from companies I applied to?"
@@ -96,7 +93,6 @@ Naukri, LinkedIn India, Instahyre, Cutshort, Hirist, Indeed India, Foundit (Mons
 10. Connects to Gmail to auto-detect outcomes (rejections, interview invites, assessment links)
 11. Runs a weekly self-correction review — adjusts strategy based on what's working
 12. Finds referrers and recruiters/HRs on LinkedIn and messages them after your approval
-13. Tailors a LaTeX master resume for Overleaf, creates one from your existing resume, or uses DOCX if you prefer
 
 **Privacy:** Your data stays in this session and on your computer. Between sessions, the skill saves only your resume format and file path, in `~/.claude/job-skill/config.md`. Gmail integration (optional) only reads emails from companies you've applied to — nothing else.
 
@@ -411,52 +407,15 @@ Find referrers and recruiters/HRs on LinkedIn for a specific job or company, the
 
 ---
 
-## Resume Tailoring Workflow (LaTeX → Overleaf, or DOCX)
+## Resume Tailoring Workflow (Master LaTeX → Overleaf)
 
-**Follow these steps every time the user asks to create or tailor their resume.** On the LaTeX path, this workflow overrides the DOCX output, market reformatting, Summary line, and zip bundling rules elsewhere in this skill. The Human-Written Tone and ATS Keyword Optimization rules apply on both paths, within the limits below. Write a cover letter only if the user asks for one.
+**Follow these steps every time the user asks to create or tailor their resume for a job description.** For these requests, this workflow overrides the DOCX output, market reformatting, Summary line, and zip bundling rules elsewhere in this skill. The Human-Written Tone and ATS Keyword Optimization rules still apply, within the limits below. Write a cover letter only if the user asks for one.
 
-If the user wants a resume tailored and hasn't provided the job description, ask for it.
+### Step 1: Read the Local Master Resume
 
-### Step 1: Choose the Resume Source
+Read the master resume LaTeX file at `/Users/sayak2k1/Coding/Resume/sayak.tex`.
 
-Check for saved settings at `~/.claude/job-skill/config.md`:
-
-```
-resume_format: latex
-master_resume: /absolute/path/to/resume.tex
-```
-
-- **`resume_format: latex` and the file can be read:** go to Step 2. Read the file fresh on every request, because it may have changed.
-- **`resume_format: latex` and the file can't be read:** tell the user, then ask the question below. Never rebuild the resume from memory.
-- **`resume_format: docx`:** go to the **DOCX Path**.
-- **No saved settings:** if the user has already given you a `.tex` file or path, use it and go to Step 2. Otherwise, ask with AskUserQuestion: "Do you have a LaTeX resume?"
-  1. **Yes, I have one:** ask for the file path, or for the source if they'd rather paste it. Save pasted source to a `.tex` file, then go to Step 2.
-  2. **No, create one for me:** go to **Create a Master LaTeX Resume**.
-  3. **No, continue with DOCX:** go to the **DOCX Path**.
-
-Save the choice to `~/.claude/job-skill/config.md` and tell the user they can change it by saying "switch my resume to LaTeX" or "switch my resume to DOCX". Save only these two fields there. If the file can't be written, keep the choice for this conversation.
-
-**In an unattended session**, don't ask. If there are no saved settings, follow the DOCX Path using the resume in the user's profile, and note this in the report.
-
-### Create a Master LaTeX Resume
-
-1. **Get the source content.** Use a resume file or profile details already shared in this conversation. Otherwise, ask the user to share a resume (PDF, DOCX, or plain text) or paste its text. If they don't have one, collect their roles, projects, skills, and education in chat. Use the pdf and docx skills to read those formats. If a PDF has no readable text, ask the user to paste it.
-2. **Fill the template.** Copy `assets/resume_template.tex` from this skill's folder and replace all of its sample text. If the template is missing, tell the user to reinstall the skill's full folder, and stop.
-   - Carry over facts exactly as written, and keep the user's wording.
-   - Don't tailor this file to a job. It's the master that later versions are based on.
-   - Never invent metrics, dates, or details. If something important is missing, ask for it. Otherwise, leave it out.
-   - Delete sections with no content. Add a section the source needs, such as Certifications, in the same style.
-   - Escape LaTeX special characters (`\&`, `\%`, `\$`, `\#`, `\_`).
-3. **Save it.** Ask which folder to use, defaulting to the current working directory. Save it as `[firstname]_resume.tex`. If that name already exists, add a version suffix (`_v2`) instead of overwriting the file.
-4. **Check that it compiles.** If `pdflatex` is available, compile it into a temporary folder, fix any errors, and delete the temporary output. If it isn't available, say the file hasn't been compiled.
-5. **Ask the user to review it.** Give them the path and list anything you left out or couldn't read. Save the settings once they accept it.
-6. **Continue.** If there's a job description, go to Step 2. Otherwise, finish with the Step 3 reply, leaving out the tailoring list.
-
-### DOCX Path
-
-1. Use the resume in the user's profile or shared in this conversation. Otherwise, ask the user to upload one.
-2. Tailor it using the **Resume generation** steps in `/job-skill search`, the **Resume Formatting** section, and the rule against adding skills the user doesn't have.
-3. Generate the file with the docx skill, then deliver it with a brief list of what was tailored, plus any JD gaps. Don't use a zip for a single resume.
+Read it fresh on every request, because it may have changed. If the file can't be read, stop and tell the user. Never rebuild the resume from memory. If the user hasn't provided the job description, ask for it.
 
 ### Step 2: Tailor and Generate a New `.tex` File
 
@@ -466,9 +425,9 @@ Save the choice to `~/.claude/job-skill/config.md` and tell the user they can ch
    - Use the JD's exact wording where it truthfully describes the user's work.
    - Only claim skills and work that the master resume supports or the user has confirmed. Never change or invent metrics, dates, titles, employers, or scope.
    - If the JD requires something the master resume doesn't support, leave it out and report it as a gap in the reply.
-3. **Generate a brand new, clean `.tex` file locally** in the master's folder, named `[MasterName]_[Company]_[RoleShort].tex`, where `[MasterName]` is the master's filename without `.tex`. Use only letters, digits, and underscores in `[Company]` and `[RoleShort]`.
-   - Never modify the master file. If the target filename already exists, add a version suffix (`_v2`) instead of overwriting it.
-   - Strictly preserve the master's LaTeX formatting, styles, and macro structures: keep the preamble, custom macros, list options, header block, and section order unchanged.
+3. **Generate a brand new, clean `.tex` file locally** at `/Users/sayak2k1/Coding/Resume/sayak_[Company]_[RoleShort].tex`.
+   - Never modify `sayak.tex`. If the target filename already exists, add a version suffix (`_v2`) instead of overwriting it.
+   - Strictly preserve the master's LaTeX formatting, styles, and macro structures: keep the preamble, `\resumeheading`, `\hypersetup`, the `itemize` options, the header block, and the section order unchanged.
    - Only change content inside existing sections. Don't add sections, packages, or macros.
    - Follow the master's conventions, such as `\textbf{...}` on key technologies and metrics.
    - Escape LaTeX special characters in new text (`\&`, `\%`, `\$`, `\#`, `\_`).
@@ -486,9 +445,9 @@ Do not produce the PDF locally. Finish with a reply containing:
 
    **Paste into Overleaf**
    1. Open your resume project at [overleaf.com](https://www.overleaf.com), or create one with **New Project → Blank Project**.
-   2. Click **New File** in the file tree and give it the same name as the new `.tex` file.
+   2. Click **New File** in the file tree and name it `sayak_[Company]_[RoleShort].tex`.
    3. Copy the code block above and paste it into the new file.
-   4. Open **Menu**, then set **Main document** to the new file and **Compiler** to `pdfLaTeX` (or `XeLaTeX` if the file loads `fontspec`).
+   4. Open **Menu**, then set **Main document** to the new file and **Compiler** to `pdfLaTeX`.
 
    **Or sync** (if your project is linked to Git or GitHub): add the new file to the linked repository, push it, and pull the change into Overleaf.
 
@@ -500,7 +459,7 @@ If the user reports a compile error or page overflow, fix the local `.tex` file 
 
 ## Resume Formatting
 
-These formatting rules apply to resumes generated by `/job-skill search`, the nightly pipeline, and the DOCX Path. Direct requests to create or tailor a resume start at the **Resume Tailoring Workflow** section.
+These formatting rules apply to resumes generated by `/job-skill search` and the nightly pipeline. Direct requests to create or tailor a resume use the **Resume Tailoring Workflow** section.
 
 **For India (default):**
 
@@ -689,7 +648,7 @@ The user only wants to see finished results — never the mechanics of how they 
 - Never pause mid-task to announce an intermediate step (e.g. "checking Naukri now...", "running a search for..."). Do all searching, scoring, and generation silently, then present only the finished output.
 - Do not stop or interrupt the flow because of a technical hiccup (a failed search, a slow platform, a parsing issue) — silently retry or skip it and continue; only mention it at the end if it materially reduced the result count (e.g. "Glassdoor didn't return results today").
 - Final output should be limited to: job listings (title, company, location, fitness score, apply link), resume/cover letter status, tracker/report summaries, and direct questions to the user. No process commentary, no tool jargon.
-- Exception: on the LaTeX path, the Resume Tailoring Workflow's final reply must include the full `.tex` code block and Overleaf instructions.
+- Exception: the Resume Tailoring Workflow's final reply must include the full `.tex` code block and Overleaf instructions.
 - Exception: `/job-skill outreach` must show the recipients, channels, and exact message text for approval, and report what was sent.
 
 ## Communication Style
